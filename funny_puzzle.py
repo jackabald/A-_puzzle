@@ -79,6 +79,40 @@ def solve(state, goal_state=[1, 2, 3, 4, 5, 6, 7, 0, 0]):
     WHAT IT SHOULD DO:
         Prints a path of configurations from initial state to goal state along  h values, number of moves, and max queue number in the format specified in the pdf.
     """
+    pq = []
+    initial_h = get_manhattan_distance(state, goal_state)
+    heapq.heappush(pq, (initial_h, state, (0, initial_h, -1)))
+    visited = {tuple(state): (0, -1)}
+    max_length = 0
+    state_info_list = []
+
+    while pq:
+        current_cost, current_state, (g, h, parent_index) = heapq.heappop(pq)
+        max_length = max(max_length, len(pq))
+
+        if current_state == goal_state:
+            state = tuple(current_state)
+            path = []
+            while state in visited:
+                g_cost, parent_state = visited[state]
+                h_cost = get_manhattan_distance(list(state), goal_state)
+                path.append((list(state), h_cost, g_cost))
+                if parent_state == -1:
+                    break
+                state = parent_state
+            path.reverse()
+            state_info_list.extend(path)
+            break
+
+        successors = get_succ(current_state)
+        for succ in successors:
+            succ_h = get_manhattan_distance(succ, goal_state)
+            succ_g = g + 1
+            succ_cost = succ_g + succ_h
+            succ_tuple = tuple(succ)
+            if succ_tuple not in visited or visited[succ_tuple][0] > succ_g:
+                visited[succ_tuple] = (succ_g, tuple(current_state))
+                heapq.heappush(pq, (succ_cost, succ, (succ_g, succ_h, len(state_info_list)-1)))
 
     # This is a format helper，which is only designed for format purpose.
     # build "state_info_list", for each "state_info" in the list, it contains "current_state", "h" and "move".
@@ -96,11 +130,11 @@ if __name__ == "__main__":
     Feel free to write your own test code here to exaime the correctness of your functions. 
     Note that this part will not be graded.
     """
-    print_succ([2,5,1,4,0,6,7,0,3])
+    #print_succ([2,5,1,4,0,6,7,0,3])
     # print()
 
     #print(get_manhattan_distance([2,5,1,4,3,6,7,0,0], [1, 2, 3, 4, 5, 6, 7, 0, 0]))
     # print()
 
-    #solve([2,5,1,4,0,6,7,0,3])
+    solve([4,3,0,5,1,6,7,2,0])
     #print()
